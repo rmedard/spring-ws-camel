@@ -12,7 +12,7 @@ public class CamelRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         CamelContext camelContext = new DefaultCamelContext();
-        from("direct:example")
+        from("direct:camel-ws")
 //                .process(exchange -> {
 //            exchange.getIn().setBody();
 //        })
