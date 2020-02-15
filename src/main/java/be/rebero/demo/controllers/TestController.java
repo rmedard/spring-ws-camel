@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.bind.JAXBException;
+
 @RestController
 public class TestController {
 
@@ -13,7 +15,12 @@ public class TestController {
     private TestService testService;
 
     @GetMapping(value = "/addNumbers")
-    public ResponseEntity<Integer> addNumbers() {
-        return ResponseEntity.ok(testService.addNumbers(2, 3));
+    public ResponseEntity addNumbers() {
+        try {
+            return ResponseEntity.ok(testService.addNumbers(2, 3));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

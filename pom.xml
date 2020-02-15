@@ -33,7 +33,7 @@
 		<!-- https://mvnrepository.com/artifact/org.apache.camel/camel-spring-ws-starter -->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-spring-ws-starter</artifactId>
+			<artifactId>camel-spring-ws</artifactId>
 			<version>2.25.0</version>
 		</dependency>
 

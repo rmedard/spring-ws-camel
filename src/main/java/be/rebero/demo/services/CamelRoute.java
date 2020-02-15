@@ -1,23 +1,32 @@
 package be.rebero.demo.services;
 
-import org.apache.camel.CamelContext;
+import org.apache.camel.builder.ErrorHandlerBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.DefaultCamelContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.tempuri.Add;
 
 @Component
 public class CamelRoute extends RouteBuilder {
 
+    @Autowired
+    @Qualifier(value = "myErrorHandler")
+    private ErrorHandlerBuilder channelBuilder;
+
     @Override
-    public void configure() throws Exception {
-        CamelContext camelContext = new DefaultCamelContext();
+    public void configure() {
+
+        errorHandler(channelBuilder);
+
         from("direct:camel-ws")
-//                .process(exchange -> {
-//            exchange.getIn().setBody();
-//        })
-//                .log("Got message: ${body}")
                 .routeId("test-route-id")
-                .to("spring-ws:http://www.dneonline.com/calculator.asmx");
+                .log("Got request: ${body}")
+                .to("spring-ws:http://www.dneonline.com/calculator.asmx")
+                .log("Got response: ${body}");
+
+        from("direct:error-ws")
+                .routeId("error-route-id")
+                .log("Got error: ${body}")
+                .to("log:error");
     }
 }

@@ -1,21 +1,26 @@
 package be.rebero.demo.services;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.ws.soap.client.SoapFaultClientException;
 import org.tempuri.Add;
 import org.tempuri.AddResponse;
+import org.tempuri.Calculator;
+import org.tempuri.ObjectFactory;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.util.JAXBResult;
-import javax.xml.namespace.QName;
-import javax.xml.transform.Result;
-import java.io.StringWriter;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.soap.SOAPException;
+import javax.xml.transform.dom.DOMSource;
+
+import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.camel.component.spring.ws.SpringWebserviceConstants.SPRING_WS_SOAP_ACTION;
 
 @Service
 public class TestService {
@@ -23,7 +28,7 @@ public class TestService {
     @Autowired
     private CamelContext camelContext;
 
-    public int addNumbers(int a, int b) {
+    public int addNumbers(int a, int b) throws JAXBException {
 
         ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
 
@@ -31,23 +36,12 @@ public class TestService {
         add.setIntA(a);
         add.setIntB(b);
 
-        JAXBElement<Add> jaxbElement = new JAXBElement<>(new QName(Add.class.getSimpleName()), Add.class, add);
+        JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
 
-        try {
-            JAXBContext context = JAXBContext.newInstance(Add.class);
-            Marshaller marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-            Result result = new JAXBResult(context);
-
-//            StringWriter sw = new StringWriter();
-            marshaller.marshal(add, result);
-            producerTemplate.sendBody("direct:camel-ws", result);
-//            producerTemplate.requestBody("direct:camel-ws", result);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-
-        return 1;
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(SPRING_WS_SOAP_ACTION, "http://tempuri.org/Add");
+//        headers.put(SPRING_WS_SOAP_ACTION, "http://tempuri.org/Calculator");
+        producerTemplate.sendBodyAndHeaders("direct:camel-ws", new JAXBSource(context, add), headers);
+        return 0;
     }
 }
