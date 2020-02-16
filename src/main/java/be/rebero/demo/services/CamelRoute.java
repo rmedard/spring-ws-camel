@@ -2,6 +2,8 @@ package be.rebero.demo.services;
 
 import org.apache.camel.builder.ErrorHandlerBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -9,14 +11,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class CamelRoute extends RouteBuilder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CamelRoute.class);
+
     @Autowired
-    @Qualifier(value = "myErrorHandler")
-    private ErrorHandlerBuilder channelBuilder;
+    @Qualifier(value = "errorHandlerBuilder")
+    private ErrorHandlerBuilder errorHandlerBuilder;
 
     @Override
     public void configure() {
 
-        errorHandler(channelBuilder);
+        errorHandler(errorHandlerBuilder);
 
         from("direct:camel-ws")
                 .routeId("test-route-id")
@@ -26,7 +30,6 @@ public class CamelRoute extends RouteBuilder {
 
         from("direct:error-ws")
                 .routeId("error-route-id")
-                .log("Got error: ${body}")
-                .to("log:error");
+                .log(">>> ${body}");
     }
 }
